@@ -9,6 +9,9 @@ class FileViewSet(viewsets.ModelViewSet):
     queryset = File.objects.all()
     serializer_class = FileSerializer
 
+    def get_queryset(self):
+        return super(FileViewSet, self).get_queryset().filter(user=self.request.user)
+
     @action(detail=True, methods=["get"])
     def csv_data(self, request, pk=None):
         file = self.get_object()
