@@ -9,6 +9,7 @@ class UserProfile(models.Model):
 
 
 class File(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     file = models.FileField(upload_to="uploads/")
     created_at = models.DateTimeField(auto_now_add=True)
