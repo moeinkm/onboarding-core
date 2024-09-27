@@ -21,6 +21,13 @@ class HeaderSerializer(serializers.ModelSerializer):
         fields = ["name", "data_type"]
 
 
+class SimpleFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = ["id", "name", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
 class FileSerializer(serializers.ModelSerializer):
     headers = HeaderSerializer(many=True, required=False)
     name = serializers.CharField(required=False)
@@ -88,6 +95,30 @@ class FileSerializer(serializers.ModelSerializer):
         for row in csv_reader:
             for header_name, value in zip(file_headers.keys(), row):
                 Value.objects.create(file_header=file_headers[header_name], value=value)
+
+
+class MultiUploadSerializer(serializers.Serializer):
+    files = serializers.ListField(
+        child=serializers.FileField(
+            max_length=100000, allow_empty_file=False, use_url=False
+        )
+    )
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            files = validated_data["files"]
+
+            uploaded_files = []
+            for file in files:
+                file_serializer = FileSerializer(
+                    data={"file": file}, context=self.context
+                )
+
+                if file_serializer.is_valid(raise_exception=True):
+                    uploaded_file = file_serializer.save()
+                    uploaded_files.append(uploaded_file)
+
+        return uploaded_files
 
 
 class FileHeaderSerializer(serializers.ModelSerializer):

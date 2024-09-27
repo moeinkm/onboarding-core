@@ -9,6 +9,7 @@ pre-commit = "*"
 djangorestframework = "*"
 pandas = "*"
 psycopg2 = "*"
+pytest-django = "*"
 
 [dev-packages]
 
