@@ -13,6 +13,8 @@ from os import environ, path
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+import django.contrib.sessions.apps
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -29,8 +31,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
-INSTALLED_APPS = [
+DEFAULT_INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -38,8 +39,15 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "core",
+    "rest_framework.authtoken",
 ]
+
+APPS = [
+    "core",
+    "accounts",
+]
+
+INSTALLED_APPS = DEFAULT_INSTALLED_APPS + APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -51,7 +59,13 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "onboarding.urls"
+ROOT_URLCONF = "core.urls"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ]
+}
 
 TEMPLATES = [
     {
@@ -69,7 +83,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "onboarding.wsgi.application"
+WSGI_APPLICATION = "core.wsgi.application"
 
 
 # Database

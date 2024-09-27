@@ -27,7 +27,7 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = File
-        fields = ["id", "name", "file", "created_at"]
+        fields = ["id", "name", "file", "headers", "created_at"]
         read_only_fields = ["id", "created_at"]
 
     def create(self, validated_data):
@@ -35,7 +35,9 @@ class FileSerializer(serializers.ModelSerializer):
         name = validated_data.get("name", uploaded_file.name)
 
         with transaction.atomic():
-            file_instance = File.objects.create(name=name)
+            file_instance = File.objects.create(
+                name=name, user=self.context["request"].user
+            )
 
             file_content = ContentFile(uploaded_file.read())
             file_instance.file.save(uploaded_file.name, file_content, save=True)
