@@ -11,6 +11,7 @@ pandas = "*"
 psycopg2 = "*"
 pytest-django = "*"
 pytest = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 
