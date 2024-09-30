@@ -11,7 +11,7 @@ from .serializers import (
 
 
 class FileViewSet(viewsets.ModelViewSet):
-    queryset = File.objects.all().select_related()
+    queryset = File.objects.all()
     serializer_class = FileSerializer
 
     SERIALIZER_MAP = {

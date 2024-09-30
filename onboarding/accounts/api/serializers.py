@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model, authenticate
-from accounts.models import UserProfile
+from django.contrib.auth import get_user_model
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -11,11 +10,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = get_user_model().objects.create_user(**validated_data)
-        UserProfile.objects.create(user=user, onboarding_complete=False)
         return user
 
 
 class OnboardingSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserProfile
+        model = get_user_model()
         fields = ["onboarding_complete"]

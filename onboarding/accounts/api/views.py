@@ -15,7 +15,7 @@ class OnboardingCompleteView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return self.request.user.userprofile
+        return self.request.user
 
 
 class CreateTokenView(ObtainAuthToken):

@@ -1,4 +1,5 @@
 import csv
+import json
 from io import StringIO
 
 from django.core.files.base import ContentFile
@@ -29,13 +30,30 @@ class SimpleFileSerializer(serializers.ModelSerializer):
 
 
 class FileSerializer(serializers.ModelSerializer):
-    headers = HeaderSerializer(many=True, required=False)
+    file_headers = serializers.CharField(required=False)
     name = serializers.CharField(required=False)
 
     class Meta:
         model = File
-        fields = ["id", "name", "file", "headers", "created_at"]
+        fields = ["id", "name", "file", "file_headers", "created_at"]
         read_only_fields = ["id", "created_at"]
+
+    def validate_file_headers(self, value):
+        try:
+            file_headers = json.loads(value)
+
+            if not isinstance(file_headers, list):
+                raise serializers.ValidationError("File headers must be a list.")
+
+            for header in file_headers:
+                if "name" not in header or "data_type" not in header:
+                    raise serializers.ValidationError(
+                        "Each header must contain a 'name' and a 'data_type' field."
+                    )
+
+            return file_headers
+        except json.JSONDecodeError:
+            raise serializers.ValidationError("Invalid JSON format for file headers.")
 
     def create(self, validated_data):
         uploaded_file = validated_data.get("file")
@@ -65,9 +83,8 @@ class FileSerializer(serializers.ModelSerializer):
         header_names = next(csv_reader)
         file_headers = {}
         headers = []
-
-        if validated_data.get("headers"):
-            for item in validated_data.get("heaaders"):
+        if validated_data.get("file_headers"):
+            for item in validated_data.get("file_headers"):
                 header, _ = Header.objects.get_or_create(
                     name=item["name"], defaults=item
                 )
@@ -84,9 +101,7 @@ class FileSerializer(serializers.ModelSerializer):
                 headers.append(header)
 
         for header in headers:
-            file_header, _ = FileHeader.objects.create(
-                file=file_instance, header=header
-            )
+            file_header = FileHeader.objects.create(file=file_instance, header=header)
             file_headers[header.name] = file_header
 
         return file_headers
@@ -119,6 +134,9 @@ class MultiUploadSerializer(serializers.Serializer):
                     uploaded_files.append(uploaded_file)
 
         return uploaded_files
+
+    def to_representation(self, instance):
+        return {"files": [FileSerializer(file).data for file in instance]}
 
 
 class FileHeaderSerializer(serializers.ModelSerializer):
