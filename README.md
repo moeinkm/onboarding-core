@@ -1,5 +1,5 @@
 # onboarding-core
-Oboarding app backend
+It's a csv to html app that saves csv to database and in frontend which is another repository converts it to html table.
 
 step 1:
 ```commandline
